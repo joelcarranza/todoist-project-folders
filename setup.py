@@ -3,7 +3,7 @@ Maintain individual folders for each Todoist project
 """
 from setuptools import find_packages, setup
 
-dependencies = ['click', 'todoist-python']
+dependencies = ['click', 'todoist-python', 'requests']
 
 setup(
     name='todoist-project-folders',

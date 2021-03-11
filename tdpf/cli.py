@@ -5,6 +5,7 @@ from datetime import date
 from datetime import datetime
 import shelve
 from datetime import timezone
+import requests
 
 def sanitize_project_name(name):
 	name = name.replace(':', '')
@@ -22,6 +23,21 @@ def init():
 	with shelve.open(str(Path.home() / '.todoist-project-folders')) as db:
 		db['api_key'] = api_key
 		db['baseline'] = datetime.now(tz=timezone.utc)
+
+@main.command()
+def folders():
+	dropbox_home = Path.home() / 'Dropbox'
+	projects_path = dropbox_home / 'Projects'
+	with shelve.open(str(Path.home() / '.todoist-project-folders')) as db:
+		api_key = db['api_key']
+		projects = requests.get("https://api.todoist.com/rest/v1/projects", headers={"Authorization": "Bearer %s" % api_key}).json()
+		project_names = [p['name'] for p in projects]
+		for project_dir in projects_path.iterdir():
+			if project_dir.is_dir():
+				if project_dir.name in project_names:
+					click.secho(project_dir.name, fg='green')
+				else:
+					click.secho(project_dir.name)
 
 @main.command()
 def manage():
